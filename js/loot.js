@@ -57,7 +57,11 @@ var GAME = GAME || {
 	}, {
 		id: 'wood',
 		name: 'Wood',
+<<<<<<< HEAD
 		type: 'material',
+=======
+		type: 'materials',
+>>>>>>> 795497039b768cdf965d2acac34e1216e1118dc9
 		desc: 'Wood to build things with.',
 		chance: 25
 	}, {
@@ -93,6 +97,7 @@ var GAME = GAME || {
 	}],
 
 	containerTypes: [{
+<<<<<<< HEAD
 		type: 'deskdrawer',
 		name: 'Desk Drawer',
 		chance: 100,
@@ -122,6 +127,11 @@ var GAME = GAME || {
 		type: 'small',
 		name: 'Small',
 		chance: 100
+=======
+		type: 'small',
+		name: 'Small',
+		chance: 90
+>>>>>>> 795497039b768cdf965d2acac34e1216e1118dc9
 	}, {
 		type: 'medium',
 		name: 'Medium',
@@ -138,19 +148,30 @@ var GAME = GAME || {
 
 	init: function() {
 		var numberOfContainers = this.getRandomNumber(0, 8),
+<<<<<<< HEAD
 			size,
+=======
+>>>>>>> 795497039b768cdf965d2acac34e1216e1118dc9
 			type,
 			chance,
 			i;
 
 		for (i = 0; i < numberOfContainers; i++) {
 
+<<<<<<< HEAD
 			size = this.getRandomNumber(0, this.containerSizes.length - 1);
 			type = this.getRandomNumber(0, this.containerTypes.length - 1);
 			chance = this.getRandomNumber(0, 100);
 
 			if (this.containerSizes[size].chance >= chance && this.containerTypes[type].chance >= chance) {
 				$('<button type="button" class="' + this.containerSizes[size].type + ' ' + this.containerTypes[type].type + '">' + this.containerSizes[size].name +  ' ' + this.containerTypes[type].name + ' </button>').appendTo('#loot');
+=======
+			type = this.getRandomNumber(0, this.containerTypes.length - 1);
+			chance = this.getRandomNumber(0, 100);
+
+			if (this.containerTypes[type].chance >= chance) {
+				$('<button type="button" class="' + this.containerTypes[type].type + '">' + this.containerTypes[type].name + ' Box</button>').appendTo('#loot');
+>>>>>>> 795497039b768cdf965d2acac34e1216e1118dc9
 			}
 		}
 
@@ -161,20 +182,34 @@ var GAME = GAME || {
 		return Math.floor(Math.random() * (max - min + 1)) + min;
 	},
 
+<<<<<<< HEAD
 	getLoot: function(size, type) {
 		var i,
 			item,
 			items,
 			itemChance,
 			typeChance,
+=======
+	getLoot: function(containerType) {
+		var i,
+			item,
+			items,
+			chance,
+>>>>>>> 795497039b768cdf965d2acac34e1216e1118dc9
 			lootAmt,
 			minCapacity,
 			maxCapacity,
 			maxLimit,
+<<<<<<< HEAD
 			contItemChance,
 			container = [];
 
 		switch (size) {
+=======
+			container = [];
+
+		switch (containerType) {
+>>>>>>> 795497039b768cdf965d2acac34e1216e1118dc9
 			case 'epic':
 				minCapacity = 15;
 				maxCapacity = 25;
@@ -197,6 +232,7 @@ var GAME = GAME || {
 				break;
 		}
 
+<<<<<<< HEAD
 		switch (type) {
 			case 'deskdrawer':
 				contItemChance = this.containerTypes[0].itemchance;
@@ -206,14 +242,22 @@ var GAME = GAME || {
 				break;
 		}
 
+=======
+>>>>>>> 795497039b768cdf965d2acac34e1216e1118dc9
 		lootAmt = this.getRandomNumber(minCapacity, maxCapacity);
 
 		for (i = 0; i < lootAmt; i++) {
 			item = this.getRandomNumber(0, this.items.length - 1);
+<<<<<<< HEAD
 			itemChance = this.getRandomNumber(1, maxLimit);
 			typeChance = this.getRandomNumber(0, 100);
 
 			if (this.items[item].chance >= itemChance && contItemChance[this.items[item].type] >= typeChance) {
+=======
+			chance = this.getRandomNumber(1, maxLimit);
+
+			if (this.items[item].chance >= chance) {
+>>>>>>> 795497039b768cdf965d2acac34e1216e1118dc9
 				container.push(this.items[item]);
 			}
 
@@ -222,12 +266,21 @@ var GAME = GAME || {
 		return container;
 	},
 
+<<<<<<< HEAD
 	listLoot: function(size, type) {
 		var i,
 			itemCount = 1,
 			loot = this.getLoot(size, type);
 
 		$('#container').html('').addClass(size + ' ' + type);
+=======
+	listLoot: function(containerType) {
+		var i,
+			itemCount = 1,
+			loot = this.getLoot(containerType);
+
+		$('#container').html('').addClass(containerType);
+>>>>>>> 795497039b768cdf965d2acac34e1216e1118dc9
 
 		if (loot.length === 0) {
 
@@ -299,7 +352,11 @@ $(function() {
 	GAME.init();
 
 	$('button').on('click', function(e) {
+<<<<<<< HEAD
 		GAME.listLoot(e.target.classList[0], e.target.classList[1]);
+=======
+		GAME.listLoot(e.target.className);
+>>>>>>> 795497039b768cdf965d2acac34e1216e1118dc9
 		$(this).attr('disabled', 'disabled').text('Opened');
 	});
 
