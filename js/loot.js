@@ -1,306 +1,324 @@
-var GAME = GAME || {
+$(function() {
 
-	items: [{
-		id: 'xdm',
-		name: 'Springfield X-DM 9mm',
-		type: 'weapon',
-		desc: 'A Springfield Armory-made hand gun chambered in 9mm.',
-		chance: 5
-	}, {
-		id: 'p226',
-		name: 'Sig-Sauer P226 45ACP',
-		type: 'weapon',
-		desc: 'Sig-Sauer-manufactured 45mm hand gun.',
-		chance: 4
-	}, {
-		id: 'm16',
-		name: 'M16A2 Assault Rifle',
-		type: 'weapon',
-		desc: 'US military standard issue assault rifle with fire selection.',
-		chance: 2
-	}, {
-		id: 'm4a1',
-		name: 'M4A1 Carbine',
-		type: 'weapon',
-		desc: 'US military and police carbine. Compact variant of the M16 best suited for close combat.',
-		chance: 3
-	}, {
-		id: 'huntingrifle',
-		name: 'Hunting Rifle',
-		type: 'weapon',
-		desc: 'An old hunting rifle with a wooden stock, chambered in .30-06.',
-		chance: 5
-	}, {
-		id: '8xscope',
-		name: '8x Rifle Scope',
-		type: 'accessory',
-		desc: 'An 8x rifle scope made to fix to a rifle with a Picatinny rail.',
-		chance: 6
-	}, {
-		id: 'm4foldingstock',
-		name: 'M4A1 Folding Stock',
-		type: 'accessory',
-		desc: 'A replacement folding stock for the M4A1 carbine.',
-		chance: 5
-	}, {
-		id: 'bat',
-		name: 'Baseball Bat',
-		type: 'weapon',
-		desc: 'A wooden bat that can be used for bludgeoning.',
-		chance: 10
-	}, {
-		id: 'water',
-		name: 'Bottle of Water',
-		type: 'consumable',
-		desc: 'A cool, clean bottle of water.',
-		chance: 20
-	}, {
-		id: 'wood',
-		name: 'Wood',
-		type: 'material',
-		desc: 'Wood to build things with.',
-		chance: 25
-	}, {
-		id: 'apple',
-		name: 'Apple',
-		type: 'consumable',
-		desc: 'A crisp Washington apple.',
-		chance: 20
-	}, {
-		id: 'soda',
-		name: 'Can of Soda',
-		type: 'consumable',
-		desc: 'A 12oz. can of carbonated goodness.',
-		chance: 25
-	}, {
-		id: 'crowbar',
-		name: 'Crowbar',
-		type: 'weapon',
-		desc: 'A hefty crowbar handy for opening doors or self-defense.',
-		chance: 8
-	}, {
-		id: 'trap',
-		name: 'TRAP!',
-		type: 'explosive',
-		desc: 'A spring trap rigged to explode!',
-		chance: 1
-	}, {
-		id: 'diamonds',
-		name: 'Bag of Diamonds',
-		type: 'valuable',
-		desc: 'A small velvet bag filled with large, intricately cut diamonds.',
-		chance: 1
-	}],
-
-	containerTypes: [{
-		type: 'deskdrawer',
-		name: 'Desk Drawer',
-		chance: 100,
-		itemchance: {
-			weapon: 20,
-			consumable: 90,
-			valuable: 50,
-			explosive: 5,
-			material: 50,
-			accessory: 20
-		}
-	}, {
-		type: 'ammocrate',
-		name: 'Ammo Crate',
-		chance: 50,
-		itemchance: {
-			weapon: 80,
-			consumable: 50,
-			valuable: 2,
-			explosive: 5,
-			material: 50,
-			accessory: 90
-		}
-	}],
-
-	containerSizes: [{
-		type: 'small',
-		name: 'Small',
-		chance: 100
-	}, {
-		type: 'medium',
-		name: 'Medium',
-		chance: 50
-	}, {
-		type: 'large',
-		name: 'Large',
-		chance: 25
-	}, {
-		type: 'epic',
-		name: 'Epic',
-		chance: 5
-	}],
-
-	init: function() {
-		var numberOfContainers = this.getRandomNumber(0, 8),
-			size,
-			type,
-			chance,
-			i;
-
-		for (i = 0; i < numberOfContainers; i++) {
-
-			size = this.getRandomNumber(0, this.containerSizes.length - 1);
-			type = this.getRandomNumber(0, this.containerTypes.length - 1);
-			chance = this.getRandomNumber(0, 100);
-
-			if (this.containerSizes[size].chance >= chance && this.containerTypes[type].chance >= chance) {
-				$('<button type="button" class="' + this.containerSizes[size].type + ' ' + this.containerTypes[type].type + '">' + this.containerSizes[size].name +  ' ' + this.containerTypes[type].name + ' </button>').appendTo('#loot');
-			}
-		}
-
-		$('<div id="container"><ul id="items"><ul></div>').appendTo('#loot');
-	},
-
-	getRandomNumber: function(min, max) {
+	// Generate random number between min and max
+	var getRandomNumber = function(min, max) {
 		return Math.floor(Math.random() * (max - min + 1)) + min;
-	},
+	};
 
-	getLoot: function(size, type) {
-		var i,
-			item,
-			items,
-			itemChance,
-			typeChance,
-			lootAmt,
-			minCapacity,
-			maxCapacity,
-			maxLimit,
-			contItemChance,
-			container = [];
+	// Individual item model
+	var Item = Backbone.Model.extend({
+		defaults: {
+			'count': 1
+		},
+		localStorage: new Store('item')
+	});
 
-		switch (size) {
-			case 'epic':
-				minCapacity = 15;
-				maxCapacity = 25;
-				maxLimit = 1;
-			case 'large':
-				minCapacity = 5;
-				maxCapacity = 15;
-				maxLimit = 25;
-				break;
-			case 'medium':
-				minCapacity = 2;
-				maxCapacity = 10;
-				maxLimit = 50;
-				break;
-			case 'small':
-			default:
-				minCapacity = 0;
-				maxCapacity = 5;
-				maxLimit = 100;
-				break;
+	// Item list
+	var ItemList = Backbone.Collection.extend({
+		model: Item,
+		localStorage: new Store('list')
+	});
+
+	// Individual item view
+	var ItemView = Backbone.View.extend({
+		tagName: 'li',
+
+		className: 'item',
+
+		template: _.template($('#item-template').html()),
+
+		render: function () {
+			this.$el.html(this.template(this.model.toJSON()));
+			this.$el.addClass(this.model.get('pid'));
+			return this;
 		}
+	});
 
-		switch (type) {
-			case 'deskdrawer':
-				contItemChance = this.containerTypes[0].itemchance;
-				break;
-			case 'ammocrate':
-				contItemChance = this.containerTypes[1].itemchance;
-				break;
+	// Inventory item view
+	var InventoryItemView = Backbone.View.extend({
+		tagName: 'li',
+
+		className: 'item',
+
+		template: _.template($('#inventory-item-template').html()),
+
+		render: function () {
+			this.$el.html(this.template(this.model.toJSON()));
+			this.$el.addClass(this.model.get('pid'));
+			return this;
 		}
+	});
 
-		lootAmt = this.getRandomNumber(minCapacity, maxCapacity);
+	// Item list view
+	var ListView = Backbone.View.extend({
+		el: $('#container'),
 
-		for (i = 0; i < lootAmt; i++) {
-			item = this.getRandomNumber(0, this.items.length - 1);
-			itemChance = this.getRandomNumber(1, maxLimit);
-			typeChance = this.getRandomNumber(0, 100);
+		events: {
+			'click li.item': 'take',
+			'click button.takeall': 'takeAll',
+			'click button.close': 'close'
+		},
 
-			if (this.items[item].chance >= itemChance && contItemChance[this.items[item].type] >= typeChance) {
-				container.push(this.items[item]);
+		initialize: function (options) {
+			var self = this;
+
+			this.listenTo(options.dispatcher, {
+				'getloot': function (e) {self.getLoot(e) }
+			});
+		},
+
+		// Does the RNG based on container size/type and returns an item list
+		getLoot: function (e) {
+			var i,
+				size = e.target.dataset.size,
+				type = e.target.dataset.type,
+				item,
+				itemChance,
+				typeChance,
+				lootAmt,
+				minCapacity,
+				maxCapacity,
+				maxLimit,
+				contItemChance,
+				container = [];
+
+			switch (size) {
+				case 'epic':
+					minCapacity = 15;
+					maxCapacity = 25;
+					maxLimit = 1;
+				case 'large':
+					minCapacity = 5;
+					maxCapacity = 15;
+					maxLimit = 25;
+					break;
+				case 'medium':
+					minCapacity = 2;
+					maxCapacity = 10;
+					maxLimit = 50;
+					break;
+				case 'small':
+				default:
+					minCapacity = 0;
+					maxCapacity = 5;
+					maxLimit = 100;
+					break;
 			}
 
-		}
+			switch (type) {
+				case 'deskdrawer':
+					contItemChance = containerTypes[0].itemchance;
+					break;
+				case 'ammocrate':
+					contItemChance = containerTypes[1].itemchance;
+					break;
+			}
 
-		return container;
-	},
+			// Randomly generated number of items
+			lootAmt = getRandomNumber(minCapacity, maxCapacity);
 
-	listLoot: function(size, type) {
-		var i,
-			itemCount = 1,
-			loot = this.getLoot(size, type);
+			// Iterate through items, randomly pulling an item from the lookup each time
+			for (i = 0; i < lootAmt; i++) {
+				item = getRandomNumber(0, items.length - 1);
+				itemChance = getRandomNumber(1, maxLimit);
+				typeChance = getRandomNumber(0, 100);
 
-		$('#container').html('').addClass(size + ' ' + type);
+				// Add the item if it passes an individual item chance and container item type chance check
+				if (items[item].chance >= itemChance && contItemChance[items[item].type] >= typeChance) {
+					container.push(items[item]);
+				}
+			}
 
-		if (loot.length === 0) {
+			var uniq = _.uniq(container, false, function (item) {
+				return item.pid;
+			});
 
-			$('#container').append('<p>This container is empty.</p>');
+			this.collection = new ItemList(container);
+			this.render(e);
+		},
 
-		} else {
+		/*	Iterates through the items, looking for a match. Checks localStorage and increments
+			item count if found. Saves new model to localStorage if not. */
+		saveItem: function (data, count) {
+			var saveItem,
+				model = {},
+				isStored = false;
 
-			$('<ul />').attr('id', 'items').appendTo('#container');
+			// Lookup Item properties and add to model
+			for (var i = 0; i < items.length; i++) {
+				if (items[i].pid === data) {
+					if (localStorage.length) {
+						for (var j = 1; j < localStorage.length; j++) {
+							var lsid = localStorage.key(j),
+								lsitem = JSON.parse(localStorage.getItem(lsid));
+							if (lsitem.pid === data) {
+								var lscount = parseInt(lsitem.count);
+								lsitem.count = count + lscount;
+								localStorage.setItem(lsid, JSON.stringify(lsitem));
+								isStored = true;
+							}
+						}
+					}
 
-			for (i = 0; i < loot.length; i++) {
+					if (!isStored) {
+						model.pid = items[i].pid;
+						model.name = items[i].name;
+						model.desc = items[i].desc;
+						model.count = count > 1 ? count : 1;
 
-				if ($('#items li#' + loot[i].id).length === 0) {
-					$('<li />').attr('id', loot[i].id).html('<strong>' + loot[i].name + '</strong><span>' + loot[i].desc + '</span><span class="count"></span>').appendTo('#items');
+						saveItem = new Item();
+						saveItem.save(model);
+					}
+				}
+			}
+		},
+
+		// Take a single item
+		take: function (e) {
+			var data = $(e.currentTarget).find('input').val(),
+				count = parseInt($(e.currentTarget).find('.count').text());
+
+			this.saveItem(data, count);
+
+			$(e.target).closest('.item').remove();
+		},
+
+		// Take all items
+		takeAll: function () {
+			var self = this,
+				data,
+				count,
+				list = $('#items li.item');
+
+			_.each(list, function (item) {
+				data = $(item).find('input').val();
+				count = parseInt($(item).find('.count').text());
+				self.saveItem(data, count);
+			});
+
+			this.el.close();
+		},
+
+		close: function () {
+			this.el.close();
+		},
+
+		render: function (e) {
+			var self = this,
+				itemView
+				itemCount = 1;
+
+			this.$el.find('ul').empty();
+
+			_.each(this.collection.models, function (item) {
+				itemView = new ItemView({
+					model: item
+				});
+
+				if ($('#items li.' + item.get('pid')).length === 0) {
+					$('#items').append(itemView.render().el);
 				} else {
 					itemCount++;
 				}
 
-				if (itemCount > 1 && loot[i].id !== 'trap') {
-					$('#items li#' + loot[i].id + ' .count').text(itemCount);
+				if (itemCount > 1 && item.get('pid') !== 'trap') {
+					$('#items li.' + item.get('pid') + ' .count').text(itemCount);
+					itemCount = 1;
 				}
 
+			}, this);
+
+			if (this.collection.models.length === 0) {
+				this.$el.find('#empty').show();
+				this.$el.find('.take, .takeall').hide();
+			} else {
+				this.$el.find('#empty').hide();
+				this.$el.find('.take, .takeall').show();
 			}
 
-			if ($('#items li#trap').length > 0) {
-				this.setOffTrap();
-			}
-
-			if ($('#items li#diamonds').length > 0) {
-				this.showCongrats();
-			}
-
-
-
+			this.el.showModal();
 		}
+	});
 
-		$('#container').show();
-	},
+	var AppView = Backbone.View.extend({
+		el: $('#loot'),
 
-	setOffTrap: function() {
-		var count = 3,
-			interval;
+		events: {
+			'click button.container': 'getLoot',
+			'click button.openinventory': 'openInventory',
+			'click button.closeinventory': 'closeInventory',
+			'click #inventory li.item': 'deleteItem'
+		},
 
-		$('#trap').append('</p>');
+		initialize: function (options) {
+			var numberOfContainers = getRandomNumber(0, 8),
+				size,
+				type,
+				chance,
+				i,
+				self = this;
 
-		interval = setInterval(function() {
-			$('#trap > p').append(count + '... ');
-			count--;
+			this.dispatcher = options.dispatcher;
 
-			if (count === 0) {
-				clearInterval(interval);
-				setTimeout(function() {
-					alert('BOOM! You\'re dead!');
-				}, 1500);
+			for (i = 0; i < numberOfContainers; i++) {
+				size = getRandomNumber(0, containerSizes.length - 1);
+				type = getRandomNumber(0, containerTypes.length - 1);
+				chance = getRandomNumber(0, 100);
+
+				if (containerSizes[size].chance >= chance && containerTypes[type].chance >= chance) {
+					$('<button type="button" class="container" data-size="' + containerSizes[size].type + '" data-type="' + containerTypes[type].type + '">' + containerSizes[size].name +  ' ' + containerTypes[type].name + '</button>').prependTo('#loot');
+				}
 			}
 
-		}, 1000);
-	},
+			var list = new ListView({dispatcher: dispatcher});
+		},
 
-	showCongrats: function() {
-		setTimeout(function() {
-			alert('CONGRATS! You found the diamonds!');
-		}, 1000);
-	}
+		getLoot: function (e) {
+			this.dispatcher.trigger('getloot', e);
+		},
 
-};
+		openInventory: function () {
+			$('#inventory #items').empty();
 
-$(function() {
+			var c = new Backbone.Collection();
+			c.localStorage = new Backbone.LocalStorage('item');
+			c.fetch({
+				success: function () {
+					_.each(c.models, function (item) {
+						itemView = new InventoryItemView({
+							model: item
+						});
+						$('#inventory #items').append(itemView.render().el);
+					}, this);
 
-	GAME.init();
+					if (c.models.length > 0) {
+						$('#inventory #empty').hide();
+					} else {
+						$('#inventory #empty').show();
+					}
+				}
+			});
 
-	$('button').on('click', function(e) {
-		GAME.listLoot(e.target.classList[0], e.target.classList[1]);
-		$(this).attr('disabled', 'disabled').text('Opened');
+			$('#inventory')[0].showModal();
+		},
+
+		closeInventory: function () {
+			$('#inventory')[0].close();
+		},
+
+		deleteItem: function (e) {
+			var id = $(e.currentTarget).find('input').val();
+			localStorage.removeItem('item-' + id);
+			$(e.currentTarget).closest('li').remove();
+
+			// If there are no more items, close the inventory
+			if ($('#inventory #items li').length === 0) {
+				$('#inventory')[0].close();
+			}
+		}
 	});
+
+	var dispatcher = _.extend({}, Backbone.Events);
+	var app = new AppView({dispatcher: dispatcher});
 
 });
