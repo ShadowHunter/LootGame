@@ -1,0 +1,96 @@
+body {
+    font-family: tahoma;
+}
+
+#loot button {
+    background: #eac69d;
+    border-radius: 5px;
+    border: 1px solid #c18b49;
+    margin: 5px;
+    padding: 5px;
+    box-shadow: 2px 2px 5px #cca378;
+    color: #724a22;
+    width: 100px;
+}
+
+#loot button:hover {
+    background: #f7d9b9;
+}
+
+#loot button:disabled {
+    background: #e5d2be;
+    border-color: #bfa485;
+    box-shadow: #c4b8ac;
+}
+
+#loot dialog {
+    background: #fff7ef;
+    border-radius: 10px;
+    border: 1px solid #efddcb;
+    width: 50%;
+    min-width: 350px;
+    padding: 1em;
+}
+
+#loot dialog > #empty {
+    font-weight: bold;
+    text-align: center;
+}
+
+#loot #items li {
+    display: flex;
+    list-style: none;
+    background: #f2e4d7;
+    border-radius: 10px;
+    border: 1px solid #e5d0be;
+    margin-bottom: .5em;
+    padding: 1em;
+}
+
+#loot #items li:hover {
+    cursor: pointer;
+}
+
+#loot #items li input.selecteditem {
+    margin-right: 1em;  
+}
+
+#loot #items li .desc {
+    width: 100%;
+}
+
+#loot #items strong {
+    font-weight: bold;
+}
+
+#loot #items span {
+    display: block;
+    font-size: .8em;
+}
+
+#loot #items span.count {
+    text-align: right;
+    font-weight: bold;
+}
+
+#loot #items > li.trap {
+    background-color: #ffd58e;
+    color: #875300;
+    border-color: #875300;
+}
+
+#loot .trap > p {
+    font-size: 2em;
+}
+
+#loot #items > li.diamonds {
+    background-color: #e6ff9b;
+    color: #506b00;
+    border-color: #506b00;
+}
+
+#loot .openinventory {
+    position: absolute;
+    right: 0;
+    margin: 1em;
+}
